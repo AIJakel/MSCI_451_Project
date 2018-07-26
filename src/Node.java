@@ -2,19 +2,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Node {
+
+    //Probability that this line will occur
     private double probabilityOfOccurring;
+
+    //Expected value is initially null because we don't know it yet
     private double expectedValue;
     private Node parent;
     private List<Node> children;
 
-    public Node(double probability) {
+    //This creates the root node of the whole tree
+    Node(double probability) {
         this.probabilityOfOccurring = probability;
         this.parent = null;
         children = new ArrayList<>();
+
+        //Expected value initially null because we don't know it yet
         this.expectedValue = Double.NaN;
     }
 
-    public Node(double probability, Node parent){
+    //This creates new nodes for the tree (not the parent)
+    Node(double probability, Node parent){
         this.probabilityOfOccurring = probability;
         children = new ArrayList<>();
         this.parent = parent;
@@ -22,6 +30,7 @@ public class Node {
         this.expectedValue = Double.NaN;
     }
 
+    //checks to see if the expectedValue was calculated yet
     public boolean hasCalculatedExpectedValue(){
         return !Double.isNaN(this.expectedValue);
     }

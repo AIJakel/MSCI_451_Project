@@ -4,11 +4,18 @@ public class Main {
     static double findingNoCancerGivenNoCancer = 1;
 
     public static void main(String[] args) {
-        System.out.println("test");
+
+        //This creates the root of the tree
         Node rootNode = new Node(1);
+
+        //This creates children of the root node
         Node childNode = new Node(0.25, rootNode);
         Node childNode2 = new Node(0.75, rootNode);
-        System.out.println(rootNode);
+
+        //This creates a child of a child
+        Node childNode3 = new Node(0.25, childNode);
+
+        System.out.println("test");
     }
 
     //generates the probabilites for 1 test over the 10 year period
