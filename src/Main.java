@@ -72,10 +72,10 @@ public class Main {
             test.addChild(testNeg);
             test.addChild(testPos);
             current.addChild(test);
-            
+
             //no test node and its children set-up
             Node differ1yr = new Node("differ1yr", 1,current);
-            Node die = new Node("die", probs.get("probDiein1yrUnknown"),differ1yr,0);
+            differ1yr.addChild(new Node("die", probs.get("probDiein1yrUnknown"),differ1yr,0));
             current.addChild(differ1yr);
 
             //set up for next iteration
