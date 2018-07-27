@@ -1,3 +1,4 @@
+import javax.naming.Name;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,32 +11,36 @@ public class Node {
     private double expectedUtility;
     private Node parent;
     private List<Node> children;
+    private String name;
 
     //This creates the root node of the whole tree
-    Node(double probability) {
+    Node(String name, double probability) {
         this.probabilityOfOccurring = probability;
         this.parent = null;
         children = new ArrayList<>();
+        this.name = name;
 
         //Expected value initially null because we don't know it yet
         this.expectedUtility = Double.NaN;
     }
 
     //This creates new nodes for the tree (not the parent)
-    Node(double probability, Node parent){
+    Node(String name, double probability, Node parent){
         this.probabilityOfOccurring = probability;
         children = new ArrayList<>();
         this.parent = parent;
         parent.children.add(this);
         this.expectedUtility = Double.NaN;
+        this.name = name;
     }
 
-    Node(double probability, Node parent, double eu){
+    Node(String name, double probability, Node parent, double eu){
         this.probabilityOfOccurring = probability;
         children = new ArrayList<>();
         this.parent = parent;
         parent.children.add(this);
         this.expectedUtility = eu;
+        this.name = name;
     }
 
     //adds child node list
@@ -75,6 +80,22 @@ public class Node {
 
     public List<Node> getChildren() {
         return children;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public Node getChild(String name)
+    {
+        for (Node child:this.children)
+        {
+            if (name.equals(child.getName()))
+            {
+                return child;
+            }
+        }
     }
 }
 

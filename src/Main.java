@@ -1,10 +1,11 @@
 import java.util.HashMap;
+import java.util.List;
 
 public class Main {
     static double incidentRate = .124;
     static double findingCancerGivenCancer = .87;
     static double findingNoCancerGivenNoCancer = 1;
-    //these are constants
+    //these are constants for living at least x years with or without cancer
     static double live1yearnoCancer = 0.996614;
     static double live1yearwithCancer = .63;
     static double live5yearnoCancer = 0.98765;
@@ -17,15 +18,15 @@ public class Main {
     public static void main(String[] args) {
 
         //This creates the root of the tree
-        Node rootNode = new Node(1);
+        Node rootNode = new Node("p",1);
 
         //This creates children of the root node
-        Node childNode = new Node(0.25, rootNode);
-        Node childNode2 = new Node(0.75, rootNode);
+        Node childNode = new Node("c1",0.25, rootNode);
+        Node childNode2 = new Node("c2",0.75, rootNode);
 
         //This creates a child of a child
-        Node childNode3 = new Node(0.25, childNode);
-
+        Node childNode3 = new Node("c3",0.25, childNode);
+        List<Node> x = rootNode.getChildren();
         System.out.println("test");
     }
 
@@ -34,6 +35,7 @@ public class Main {
         //create the nodes
         Node previous = null;
         Node current = null;
+        double probLive1yr = 0;
         for (int i = 1; i <= years; i++)
         {
             HashMap<String,Double> probs = getProbs(i);
@@ -41,36 +43,78 @@ public class Main {
             //create decision nodes year 1 has prob 1 of occurring
             if (i == 1)
             {
-                current = new Node(1);
+                current = new Node("y1",1);
             }
             else if (previous != null)
             {
-                current = new Node(.2);
+                Node previousDiffer = previous.getChild("differ1yr");
+                current = new Node("year"+i, probLive1yr,previousDiffer); //this is the child of the previous's differ-> node
             }
 
-            //test node
-            Node test = new Node(1,current);
+            //test node and its children set up
+            Node test = new Node("test",1,current);
             //test pos and negative node
-            Node testPos = new Node(probs.get("probTestPos"),test);
-            Node testNeg = new Node(probs.get("probTestNeg"),test);
+            Node testPos = new Node("testPos",probs.get("probTestPos"),test);
+            Node testNeg = new Node("testNeg",probs.get("probTestNeg"),test);
 
             //test true negative and false negative
-            Node testNegTrue = new Node(probs.get("probTrueNeg"),testNeg);
-            Node testNegFalse = new Node(probs.get("probFalseNeg"), testNeg);
+            Node testNegTrue = new Node("testNegTrue", probs.get("probTrueNeg"),testNeg);
+            Node testNegFalse = new Node("testNegFalse", probs.get("probFalseNeg"), testNeg);
+
+            //attach utilities
+            testPos = generateUtilities(testPos,false);
+            testNegTrue = generateUtilities(testNegTrue,false);
+            testNegFalse = generateUtilities(testNegFalse,true);
 
             //add children nodes
-            test.addChild(testNeg);
-            test.addChild(testPos);
             testNeg.addChild(testNegTrue);
             testNeg.addChild(testNegFalse);
+            test.addChild(testNeg);
+            test.addChild(testPos);
+            current.addChild(test);
+            
+            //no test node and its children set-up
+            Node differ1yr = new Node("differ1yr", 1,current);
+            Node die = new Node("die", probs.get("probDiein1yrUnknown"),differ1yr,0);
+            current.addChild(differ1yr);
 
-            testPos.addChild(new Node(live5yearnoCancer,testPos,5));
-            testPos.addChild(new Node());
-
+            //set up for next iteration
             previous = current;
+            probLive1yr = probs.get("probLive1yrUnkown");
         }
     }
 
+    /**
+     * Generates the Utility nodes for a second till end node.
+     * @param genFor the node to generate values for
+     * @param cancer true if patient has cancer
+     * @return the given node with utility nodes as children
+     */
+    private static Node generateUtilities(Node genFor, boolean cancer)
+    {
+        if (cancer)
+        {
+            genFor.addChild(new Node("lessthan5cancer",1-(live5yearwithCancer+live15yearwithCancer+live25yearwithCancer),genFor,0));
+            genFor.addChild(new Node("5cancer", live5yearwithCancer,genFor,50));
+            genFor.addChild(new Node("15cancer", live15yearwithCancer,genFor,80));
+            genFor.addChild(new Node("25cancer", live25yearwithCancer,genFor,100));
+        }
+        else
+        {
+            genFor.addChild(new Node("lessthan5Nocancer", 1-(live5yearnoCancer+live15yearnoCancer+live25yearnoCancer),genFor,0));
+            genFor.addChild(new Node("5Nocancer", live5yearnoCancer,genFor,50));
+            genFor.addChild(new Node("15NoCancer", live15yearnoCancer,genFor,80));
+            genFor.addChild(new Node("25NoCancer", live25yearnoCancer,genFor,100));
+        }
+        return genFor;
+    }
+
+
+    /**
+     * Generates all the probabilities for a single year node.
+     * @param years the year the probabilities need to be generated for.
+     * @return maps of probabilities
+     */
     private static HashMap<String,Double> getProbs (int years)
     {
         HashMap<String,Double> probs = new HashMap<>();
@@ -87,8 +131,8 @@ public class Main {
         probs.put("probFalseNeg",1 - probs.get("probTrueNeg"));
 
         //for defferal probs note the live 1 yr thing is the next roots prior prob need.
-        probs.put("probLive1yrWithCancer",(1 - probs.get("probCancer"))*live1yearnoCancer + probs.get("probCancer") * live1yearwithCancer);
-        probs.put("probDiein1yrWithCancer",1-probs.get("probLive1yrWithCancer"));
+        probs.put("probLive1yrUnkown",(1 - probs.get("probCancer"))*live1yearnoCancer + probs.get("probCancer") * live1yearwithCancer);
+        probs.put("probDiein1yrUnknown",1-probs.get("probLive1yrUnkown"));
 
         return probs;
     }
