@@ -96,6 +96,7 @@ public class Node {
                 return child;
             }
         }
+        return new Node("ERROR",0);
     }
 }
 

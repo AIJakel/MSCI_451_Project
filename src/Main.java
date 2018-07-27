@@ -17,6 +17,7 @@ public class Main {
 
     public static void main(String[] args) {
 
+        /*
         //This creates the root of the tree
         Node rootNode = new Node("p",1);
 
@@ -27,12 +28,16 @@ public class Main {
         //This creates a child of a child
         Node childNode3 = new Node("c3",0.25, childNode);
         List<Node> x = rootNode.getChildren();
+        */
+        //current bug generating nodes twice for some reason.
+        Node root = ProbGenerator_1Test(3);
         System.out.println("test");
     }
 
     //generates the probabilities. for 1 test over the 10 year period
-    private static void ProbGenerator_1Test(int years) {
+    private static Node ProbGenerator_1Test(int years) {
         //create the nodes
+        Node root = null;
         Node previous = null;
         Node current = null;
         double probLive1yr = 0;
@@ -43,9 +48,10 @@ public class Main {
             //create decision nodes year 1 has prob 1 of occurring
             if (i == 1)
             {
-                current = new Node("y1",1);
+                current = new Node("year1",1);
+                root = current;
             }
-            else if (previous != null)
+            else
             {
                 Node previousDiffer = previous.getChild("differ1yr");
                 current = new Node("year"+i, probLive1yr,previousDiffer); //this is the child of the previous's differ-> node
@@ -82,6 +88,7 @@ public class Main {
             previous = current;
             probLive1yr = probs.get("probLive1yrUnkown");
         }
+        return root;
     }
 
     /**
