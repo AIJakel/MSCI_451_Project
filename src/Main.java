@@ -49,11 +49,11 @@ public class Main {
             if (i == 1)
             {
                 Node year1 = new Node(1);
-                year1.
+              //  year1.
             }
             else if(previous != null)
             {
-                Node
+              //  Node
             }
         }
     }
