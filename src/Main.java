@@ -72,17 +72,10 @@ public class Main {
             testNegTrue = generateUtilities(testNegTrue,false);
             testNegFalse = generateUtilities(testNegFalse,true);
 
-            //add children nodes
-            testNeg.addChild(testNegTrue);
-            testNeg.addChild(testNegFalse);
-            test.addChild(testNeg);
-            test.addChild(testPos);
-            current.addChild(test);
 
-            //no test node and its children set-up
+
+            //no test node
             Node differ1yr = new Node("differ1yr", 1,current);
-            differ1yr.addChild(new Node("die", probs.get("probDiein1yrUnknown"),differ1yr,0));
-            current.addChild(differ1yr);
 
             //set up for next iteration
             previous = current;
@@ -99,19 +92,20 @@ public class Main {
      */
     private static Node generateUtilities(Node genFor, boolean cancer)
     {
+        Node x = null;
         if (cancer)
         {
-            genFor.addChild(new Node("lessthan5cancer",1-(live5yearwithCancer+live15yearwithCancer+live25yearwithCancer),genFor,0));
-            genFor.addChild(new Node("5cancer", live5yearwithCancer,genFor,50));
-            genFor.addChild(new Node("15cancer", live15yearwithCancer,genFor,80));
-            genFor.addChild(new Node("25cancer", live25yearwithCancer,genFor,100));
+            x = new Node("lessthan5cancer",1-(live5yearwithCancer+live15yearwithCancer+live25yearwithCancer),genFor,0);
+            x = new Node("5cancer", live5yearwithCancer,genFor,50);
+            x = new Node("15cancer", live15yearwithCancer,genFor,80);
+            x = new Node("25cancer", live25yearwithCancer,genFor,100);
         }
         else
         {
-            genFor.addChild(new Node("lessthan5Nocancer", 1-(live5yearnoCancer+live15yearnoCancer+live25yearnoCancer),genFor,0));
-            genFor.addChild(new Node("5Nocancer", live5yearnoCancer,genFor,50));
-            genFor.addChild(new Node("15NoCancer", live15yearnoCancer,genFor,80));
-            genFor.addChild(new Node("25NoCancer", live25yearnoCancer,genFor,100));
+            x = new Node("lessthan5Nocancer", 1-(live5yearnoCancer+live15yearnoCancer+live25yearnoCancer),genFor,0);
+            x = new Node("5Nocancer", live5yearnoCancer,genFor,50);
+            x = new Node("15NoCancer", live15yearnoCancer,genFor,80);
+            x = new Node("25NoCancer", live25yearnoCancer,genFor,100);
         }
         return genFor;
     }
