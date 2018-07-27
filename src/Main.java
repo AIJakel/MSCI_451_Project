@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 public class Main {
     static double incidentRate = .124;
     static double findingCancerGivenCancer = .87;
@@ -27,35 +29,68 @@ public class Main {
         System.out.println("test");
     }
 
-    //generates the probabilites for 1 test over the 10 year period
+    //generates the probabilities. for 1 test over the 10 year period
     private static void ProbGenerator_1Test(int years) {
         //create the nodes
         Node previous = null;
+        Node current = null;
         for (int i = 1; i <= years; i++)
         {
-            //generates the probabilities -> turn into function
-            double probCancer = 1 - Math.pow(1 - incidentRate, years);
-            //get test results
-            double probTestPos = probCancer * findingCancerGivenCancer;
-            double probTestNeg = probCancer * (1 - findingCancerGivenCancer) + 1 - probCancer;
-            //true neg and pos results
-            double probTrueNeg = (1 - probCancer) / probTestNeg;
-            double probFalseNeg = 1 - probTrueNeg;
-            //for defferal probs note the live 1 yr thing is the next roots prior prob need.
-            double probLive1yrWithCancer = (1 - probCancer)*live1yearnoCancer + probCancer * live1yearwithCancer;
-            double probDiein1yrWithCancer = 1-probLive1yrWithCancer;
+            HashMap<String,Double> probs = getProbs(i);
 
-            //create descision nodes
+            //create decision nodes year 1 has prob 1 of occurring
             if (i == 1)
             {
-                Node year1 = new Node(1);
-                //  year1.
+                current = new Node(1);
             }
-            else if(previous != null)
+            else if (previous != null)
             {
-                //  Node
+                current = new Node(.2);
             }
+
+            //test node
+            Node test = new Node(1,current);
+            //test pos and negative node
+            Node testPos = new Node(probs.get("probTestPos"),test);
+            Node testNeg = new Node(probs.get("probTestNeg"),test);
+
+            //test true negative and false negative
+            Node testNegTrue = new Node(probs.get("probTrueNeg"),testNeg);
+            Node testNegFalse = new Node(probs.get("probFalseNeg"), testNeg);
+
+            //add children nodes
+            test.addChild(testNeg);
+            test.addChild(testPos);
+            testNeg.addChild(testNegTrue);
+            testNeg.addChild(testNegFalse);
+
+            testPos.addChild(new Node(live5yearnoCancer,testPos,5));
+            testPos.addChild(new Node());
+
+            previous = current;
         }
+    }
+
+    private static HashMap<String,Double> getProbs (int years)
+    {
+        HashMap<String,Double> probs = new HashMap<>();
+
+        //generates the probabilities -> turn into function
+        probs.put("probCancer",1 - Math.pow(1 - incidentRate, years));
+
+        //get test results
+        probs.put("probTestPos",probs.get("probCancer") * findingCancerGivenCancer);
+        probs.put("probTestNeg",probs.get("probCancer") * (1 - findingCancerGivenCancer) + 1 - probs.get("probCancer"));
+
+        //true neg and pos results
+        probs.put("probTrueNeg",(1 - probs.get("probCancer")) / probs.get("probTestNeg"));
+        probs.put("probFalseNeg",1 - probs.get("probTrueNeg"));
+
+        //for defferal probs note the live 1 yr thing is the next roots prior prob need.
+        probs.put("probLive1yrWithCancer",(1 - probs.get("probCancer"))*live1yearnoCancer + probs.get("probCancer") * live1yearwithCancer);
+        probs.put("probDiein1yrWithCancer",1-probs.get("probLive1yrWithCancer"));
+
+        return probs;
     }
 
     /*

@@ -7,7 +7,7 @@ public class Node {
     private double probabilityOfOccurring;
 
     //Expected value is initially null because we don't know it yet
-    private double expectedValue;
+    private double expectedUtility;
     private Node parent;
     private List<Node> children;
 
@@ -18,7 +18,7 @@ public class Node {
         children = new ArrayList<>();
 
         //Expected value initially null because we don't know it yet
-        this.expectedValue = Double.NaN;
+        this.expectedUtility = Double.NaN;
     }
 
     //This creates new nodes for the tree (not the parent)
@@ -27,12 +27,26 @@ public class Node {
         children = new ArrayList<>();
         this.parent = parent;
         parent.children.add(this);
-        this.expectedValue = Double.NaN;
+        this.expectedUtility = Double.NaN;
     }
 
-    //checks to see if the expectedValue was calculated yet
+    Node(double probability, Node parent, double eu){
+        this.probabilityOfOccurring = probability;
+        children = new ArrayList<>();
+        this.parent = parent;
+        parent.children.add(this);
+        this.expectedUtility = eu;
+    }
+
+    //adds child node list
+    public void addChild(Node child)
+    {
+        children.add(child);
+    }
+
+    //checks to see if the expectedUtility was calculated yet
     public boolean hasCalculatedExpectedValue(){
-        return !Double.isNaN(this.expectedValue);
+        return !Double.isNaN(this.expectedUtility);
     }
 
     public double getProbabilityOfOccurring() {
@@ -43,12 +57,12 @@ public class Node {
         this.probabilityOfOccurring = probabilityOfOccurring;
     }
 
-    public double getExpectedValue() {
-        return expectedValue;
+    public double getExpectedUtility() {
+        return expectedUtility;
     }
 
-    public void setExpectedValue(double expectedValue) {
-        this.expectedValue = expectedValue;
+    public void setExpectedUtility(double expectedUtility) {
+        this.expectedUtility = expectedUtility;
     }
 
     public Node getParent() {
