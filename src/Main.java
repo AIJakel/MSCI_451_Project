@@ -37,6 +37,15 @@ public class Main {
         System.out.println("");
     }
 
+
+    private static Node ProbGenerator_3Test (int years)
+    {
+        Node root = null;
+
+        return root;
+    }
+
+
     /**
      * Generates a descision tree for 1 mamography over a given set of years.
      * @param years the number years that the tree needs to be generated for
