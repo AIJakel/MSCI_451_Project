@@ -21,20 +21,20 @@ public class Node {
         this.name = name;
 
         //Expected value initially null because we don't know it yet
-        this.expectedUtility = Double.NaN;
+        this.expectedUtility = 0;
     }
 
     //This creates new nodes for the tree (not the parent)
-    Node(String name, double probability, Node parent){
+    Node(String name, double probability, Node parent) {
         this.probabilityOfOccurring = probability;
         children = new ArrayList<>();
         this.parent = parent;
         parent.children.add(this);
-        this.expectedUtility = Double.NaN;
+        this.expectedUtility = 0;
         this.name = name;
     }
 
-    Node(String name, double probability, Node parent, double eu){
+    Node(String name, double probability, Node parent, double eu) {
         this.probabilityOfOccurring = probability;
         children = new ArrayList<>();
         this.parent = parent;
@@ -44,13 +44,12 @@ public class Node {
     }
 
     //adds child node list
-    public void addChild(Node child)
-    {
+    public void addChild(Node child) {
         children.add(child);
     }
 
     //checks to see if the expectedUtility was calculated yet
-    public boolean hasCalculatedExpectedValue(){
+    public boolean hasCalculatedExpectedValue() {
         return !Double.isNaN(this.expectedUtility);
     }
 
@@ -63,7 +62,20 @@ public class Node {
     }
 
     public double getExpectedUtility() {
-        return expectedUtility;
+        if (!hasChildren()) {
+            System.out.println(expectedUtility);
+            return expectedUtility;
+        } else {
+            double utility = 0;
+            for (Node child : this.children) {
+                utility += child.getExpectedUtility() * child.getProbabilityOfOccurring();
+            }
+            return utility;
+        }
+    }
+
+    public boolean hasChildren() {
+        return this.children.size() > 0;
     }
 
     public void setExpectedUtility(double expectedUtility) {
@@ -82,21 +94,17 @@ public class Node {
         return children;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public Node getChild(String name)
-    {
-        for (Node child:this.children)
-        {
-            if (name.equals(child.getName()))
-            {
+    public Node getChild(String name) {
+        for (Node child : this.children) {
+            if (name.equals(child.getName())) {
                 return child;
             }
         }
-        return new Node("ERROR",0);
+        return new Node("ERROR", 0);
     }
 }
 

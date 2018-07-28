@@ -31,6 +31,7 @@ public class Main {
         */
         //current bug generating nodes twice for some reason.
         Node root = ProbGenerator_1Test(3);
+        double expectedValue = root.getExpectedUtility();
         System.out.println("test");
     }
 
