@@ -75,10 +75,13 @@ public class Main {
             testNegTrue = generateUtilities(testNegTrue,false);
             testNegFalse = generateUtilities(testNegFalse,true);
 
-
-
-            //no test node
-            Node differ1yr = new Node("differ1yr", 1,current);
+            //assumption patient has to get the test done in the last year
+            if (i != years)
+            {
+                //no test node
+                Node differ1yr = new Node("differ1yr", 1,current);
+                Node die = new Node("die",probs.get("probDiein1yrUnknown"),differ1yr,0);
+            }
 
             //set up for next iteration
             previous = current;
