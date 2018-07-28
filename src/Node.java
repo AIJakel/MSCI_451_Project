@@ -21,7 +21,7 @@ public class Node {
         this.name = name;
 
         //Expected value initially null because we don't know it yet
-        this.expectedUtility = 0;
+        this.expectedUtility = Double.NaN;
     }
 
     //This creates new nodes for the tree (not the parent)
@@ -30,7 +30,7 @@ public class Node {
         children = new ArrayList<>();
         this.parent = parent;
         parent.children.add(this);
-        this.expectedUtility = 0;
+        this.expectedUtility = Double.NaN;
         this.name = name;
     }
 
@@ -41,11 +41,6 @@ public class Node {
         parent.children.add(this);
         this.expectedUtility = eu;
         this.name = name;
-    }
-
-    //adds child node list
-    public void addChild(Node child) {
-        children.add(child);
     }
 
     //checks to see if the expectedUtility was calculated yet
@@ -63,7 +58,10 @@ public class Node {
 
     public double getExpectedUtility() {
         if (!hasChildren()) {
-            System.out.println(expectedUtility);
+            if (!this.hasCalculatedExpectedValue()){
+                System.out.println("Error - End Node named:"+ this.name+" doesn't have an expected value. The value 0 has been used as a replacement.");
+                return 0;
+            }
             return expectedUtility;
         } else {
             double utility = 0;
