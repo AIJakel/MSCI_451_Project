@@ -8,7 +8,7 @@ public class Main {
     //these are constants for living at least x years with or without cancer
     static double live1yearnoCancer = 0.996614;
     static double live1yearwithCancer = .63;
-    static double live5yearnoCancer = 0.98765;
+    static double live5yearnoCancer = 0.994476;
     static double live5yearwithCancer = .87;
     static double live15yearnoCancer = 0.98765;
     static double live15yearwithCancer = .50;
@@ -30,14 +30,18 @@ public class Main {
         List<Node> x = rootNode.getChildren();
         */
         //current bug generating nodes twice for some reason.
-        Node root = ProbGenerator_1Test(3);
+        Node root = ProbGenerator_1Test(1);
         System.out.println("");
         System.out.println("");
         System.out.println("The expected value of the decision tree is: " + Math.round(root.getExpectedUtility()));
         System.out.println("");
     }
 
-    //generates the probabilities. for 1 test over the 10 year period
+    /**
+     * Generates a descision tree for 1 mamography over a given set of years.
+     * @param years the number years that the tree needs to be generated for
+     * @return root node of the tree
+     */
     private static Node ProbGenerator_1Test(int years) {
         //create the nodes
         Node root = null;
@@ -101,14 +105,12 @@ public class Main {
         Node x = null;
         if (cancer)
         {
-            x = new Node("lessthan5cancer",1-(live5yearwithCancer+live15yearwithCancer+live25yearwithCancer),genFor,0);
             x = new Node("5cancer", live5yearwithCancer,genFor,50);
             x = new Node("15cancer", live15yearwithCancer,genFor,80);
             x = new Node("25cancer", live25yearwithCancer,genFor,100);
         }
         else
         {
-            x = new Node("lessthan5Nocancer", 1-(live5yearnoCancer+live15yearnoCancer+live25yearnoCancer),genFor,0);
             x = new Node("5Nocancer", live5yearnoCancer,genFor,50);
             x = new Node("15NoCancer", live15yearnoCancer,genFor,80);
             x = new Node("25NoCancer", live25yearnoCancer,genFor,100);
@@ -170,6 +172,6 @@ test neg false is (prob cancer) * test neg?
 
 //assumtion: uncussessful treatment is like living with cancer. ie not cured does o
 //likelihood of dying in 1 year with or without cancer
-//
+// living year end nodes are ranges ie 0-5, 5-15 etc.
 }
 
