@@ -31,8 +31,10 @@ public class Main {
         */
         //current bug generating nodes twice for some reason.
         Node root = ProbGenerator_1Test(3);
-        double expectedValue = root.getExpectedUtility();
-        System.out.println("test");
+        System.out.println("");
+        System.out.println("");
+        System.out.println("The expected value of the decision tree is: " + Math.round(root.getExpectedUtility()));
+        System.out.println("");
     }
 
     //generates the probabilities. for 1 test over the 10 year period
