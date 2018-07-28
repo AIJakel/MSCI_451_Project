@@ -16,20 +16,6 @@ public class Main {
     static double live25yearwithCancer = .50;
 
     public static void main(String[] args) {
-
-        /*
-        //This creates the root of the tree
-        Node rootNode = new Node("p",1);
-
-        //This creates children of the root node
-        Node childNode = new Node("c1",0.25, rootNode);
-        Node childNode2 = new Node("c2",0.75, rootNode);
-
-        //This creates a child of a child
-        Node childNode3 = new Node("c3",0.25, childNode);
-        List<Node> x = rootNode.getChildren();
-        */
-        //current bug generating nodes twice for some reason.
         Node root = ProbGenerator_1Test(1);
         System.out.println("");
         System.out.println("");
@@ -38,12 +24,113 @@ public class Main {
     }
 
 
+
+    //needs to be like below but recursive ie every time a new tree is built call this function again build it and come back or build a new one?
     private static Node ProbGenerator_3Test (int years)
     {
+        //create the nodes
         Node root = null;
+        Node previous = null;
+        Node current = null;
+        double probLive1yr = 0;
 
+        //TODO good till here
+        for (int i = 1; i <= years; i++)
+        {
+            HashMap<String,Double> probs = getProbs(i);
+
+            //create decision nodes year 1 has prob 1 of occurring
+            if (i == 1)
+            {
+                current = new Node("year1",1);
+                root = current;
+            }
+            else
+            {
+                Node previousDiffer = previous.getChild("differ1yr");
+                current = new Node("year"+i, probLive1yr,previousDiffer); //this is the child of the previous's differ-> node
+            }
+
+            //test node and its children set up
+            Node test = new Node("test",1,current);
+            //test pos and negative node
+            Node testPos = new Node("testPos",probs.get("probTestPos"),test);
+            Node testNeg = new Node("testNeg",probs.get("probTestNeg"),test);
+
+            //test true negative and false negative
+            Node testNegTrue = new Node("testNegTrue", probs.get("probTrueNeg"),testNeg);
+            Node testNegFalse = new Node("testNegFalse", probs.get("probFalseNeg"), testNeg);
+
+            //attach utilities
+            testPos = generateUtilities(testPos,false);
+            testNegTrue = generateUtilities(testNegTrue,false);
+            testNegFalse = generateUtilities(testNegFalse,true);
+
+            //assumption patient has to get the test done in the last year
+            if (i != years)
+            {
+                //no test node
+                Node differ1yr = new Node("differ1yr", 1,current);
+                Node die = new Node("die",probs.get("probDiein1yrUnknown"),differ1yr,0);
+            }
+
+            //set up for next iteration
+            previous = current;
+            probLive1yr = probs.get("probLive1yrUnkown");
+        }
         return root;
     }
+
+
+    //Assume treatment always works and any deaths due to treatment are captured in death rate
+    //if treated cancer resets
+    //if no cancer then rate continues
+    //if cancer then prob cancer is 1.
+
+    private static HashMap<String,Double> getProbs (int years)
+    {
+        HashMap<String,Double> probs = new HashMap<>();
+
+        //generates the probabilities -> turn into function
+        probs.put("probCancer",1 - Math.pow(1 - incidentRate, years));
+
+        //get test results
+        probs.put("probTestPos",probs.get("probCancer") * findingCancerGivenCancer);
+        probs.put("probTestNeg",probs.get("probCancer") * (1 - findingCancerGivenCancer) + 1 - probs.get("probCancer"));
+
+        //true neg and pos results
+        probs.put("probTrueNeg",(1 - probs.get("probCancer")) / probs.get("probTestNeg"));
+        probs.put("probFalseNeg",1 - probs.get("probTrueNeg"));
+
+        //for defferal probs note the live 1 yr thing is the next roots prior prob need.
+        probs.put("probLive1yrUnkown",(1 - probs.get("probCancer"))*live1yearnoCancer + probs.get("probCancer") * live1yearwithCancer);
+        probs.put("probDiein1yrUnknown",1-probs.get("probLive1yrUnkown"));
+
+        return probs;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /**
