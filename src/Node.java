@@ -57,6 +57,19 @@ public class Node {
     }
 
     public double getExpectedUtility() {
+        if(this.name.contains("year")){
+            double maxUtility = 0;
+            int counter = 0;
+            for (int i = 0; i < this.children.size(); i++){
+                double childUtility = this.children.get(i).getExpectedUtility();
+                if (maxUtility < childUtility){
+                    maxUtility = childUtility;
+                    counter = i;
+                }
+            }
+            System.out.println("Decision node named: " + this.name + "'s child node named: " + this.children.get(counter).name + " has produced the highest decision");
+            return maxUtility;
+        }
         if (!hasChildren()) {
             if (!this.hasCalculatedExpectedValue()){
                 System.out.println("Error - End Node named:"+ this.name+" doesn't have an expected value. The value 0 has been used as a replacement.");
