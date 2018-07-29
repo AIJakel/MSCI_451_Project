@@ -1,5 +1,4 @@
 import java.util.HashMap;
-import java.util.List;
 
 public class Main {
     static double incidentRate = .124;
@@ -16,40 +15,58 @@ public class Main {
     static double live25yearwithCancer = .50;
 
     public static void main(String[] args) {
-        Node root = ProbGenerator_1Test(1);
+        Node root1Test = ProbGenerator_1Test(1);
+        Node root3Test = ProbGenerator_3Test(1,10,false,0,0,null);
         System.out.println("");
         System.out.println("");
-        System.out.println("The expected value of the decision tree is: " + Math.round(root.getExpectedUtility()));
+        System.out.println("The expected value of the decision tree is: " + Math.round(root1Test.getExpectedUtility()));
         System.out.println("");
+        System.out.println("");
+        System.out.println("");
+        System.out.println("");
+        System.out.println("");
+        System.out.println("");
+        //call 3 year with 10,false,0,0,null
     }
 
 
 
     //needs to be like below but recursive ie every time a new tree is built call this function again build it and come back or build a new one?
-    private static Node ProbGenerator_3Test (int years)
+    private static Node ProbGenerator_3Test (int currentyear, int endYear, boolean hasCancer, int treatmentYear, int numTests, Node previousNode)
     {
         //create the nodes
         Node root = null;
-        Node previous = null;
-        Node current = null;
+        Node previous = previousNode;
+        Node current;
         double probLive1yr = 0;
 
-        //TODO good till here
-        for (int i = 1; i <= years; i++)
+        for (; currentyear <= endYear; currentyear++)
         {
-            HashMap<String,Double> probs = getProbs(i);
+            HashMap<String,Double> probs = getProbs(currentyear,hasCancer,treatmentYear);
+
+            if (numTests == 3 && hasCancer)
+            {
+                generateUtilities(previous,true);
+                return previous;
+            }
+            else if (numTests == 3 && !hasCancer)
+            {
+                generateUtilities(previous,false);
+                return previous;
+            }
+
 
             //create decision nodes year 1 has prob 1 of occurring
-            if (i == 1)
+            if (currentyear == 1)
             {
                 current = new Node("year1",1);
                 root = current;
             }
             else
             {
-                Node previousDiffer = previous.getChild("differ1yr");
-                current = new Node("year"+i, probLive1yr,previousDiffer); //this is the child of the previous's differ-> node
+                current = new Node("year"+currentyear, probLive1yr,previous); //this is the child of the previous's differ-> node
             }
+
 
             //test node and its children set up
             Node test = new Node("test",1,current);
@@ -61,13 +78,15 @@ public class Main {
             Node testNegTrue = new Node("testNegTrue", probs.get("probTrueNeg"),testNeg);
             Node testNegFalse = new Node("testNegFalse", probs.get("probFalseNeg"), testNeg);
 
-            //attach utilities
-            testPos = generateUtilities(testPos,false);
-            testNegTrue = generateUtilities(testNegTrue,false);
-            testNegFalse = generateUtilities(testNegFalse,true);
+
+            //generate positive continuation
+            ProbGenerator_3Test(currentyear++,endYear,false,currentyear,numTests++,testPos);
+            ProbGenerator_3Test(currentyear++,endYear,false,currentyear,numTests++,testNegTrue);
+            ProbGenerator_3Test(currentyear++,endYear,true,currentyear, numTests++,testNegFalse);
+
 
             //assumption patient has to get the test done in the last year
-            if (i != years)
+            if (currentyear == endYear || (currentyear == endYear-2 && numTests == 0) || (currentyear == endYear-1 && numTests <2))
             {
                 //no test node
                 Node differ1yr = new Node("differ1yr", 1,current);
@@ -75,63 +94,11 @@ public class Main {
             }
 
             //set up for next iteration
-            previous = current;
+            previous = current.getChild("differ1yr");
             probLive1yr = probs.get("probLive1yrUnkown");
         }
         return root;
     }
-
-
-    //Assume treatment always works and any deaths due to treatment are captured in death rate
-    //if treated cancer resets
-    //if no cancer then rate continues
-    //if cancer then prob cancer is 1.
-
-    private static HashMap<String,Double> getProbs (int years)
-    {
-        HashMap<String,Double> probs = new HashMap<>();
-
-        //generates the probabilities -> turn into function
-        probs.put("probCancer",1 - Math.pow(1 - incidentRate, years));
-
-        //get test results
-        probs.put("probTestPos",probs.get("probCancer") * findingCancerGivenCancer);
-        probs.put("probTestNeg",probs.get("probCancer") * (1 - findingCancerGivenCancer) + 1 - probs.get("probCancer"));
-
-        //true neg and pos results
-        probs.put("probTrueNeg",(1 - probs.get("probCancer")) / probs.get("probTestNeg"));
-        probs.put("probFalseNeg",1 - probs.get("probTrueNeg"));
-
-        //for defferal probs note the live 1 yr thing is the next roots prior prob need.
-        probs.put("probLive1yrUnkown",(1 - probs.get("probCancer"))*live1yearnoCancer + probs.get("probCancer") * live1yearwithCancer);
-        probs.put("probDiein1yrUnknown",1-probs.get("probLive1yrUnkown"));
-
-        return probs;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /**
      * Generates a descision tree for 1 mamography over a given set of years.
@@ -146,7 +113,7 @@ public class Main {
         double probLive1yr = 0;
         for (int i = 1; i <= years; i++)
         {
-            HashMap<String,Double> probs = getProbs(i);
+            HashMap<String,Double> probs = getProbs(i,false,0);
 
             //create decision nodes year 1 has prob 1 of occurring
             if (i == 1)
@@ -171,16 +138,16 @@ public class Main {
             Node testNegFalse = new Node("testNegFalse", probs.get("probFalseNeg"), testNeg);
 
             //attach utilities
-            testPos = generateUtilities(testPos,false);
-            testNegTrue = generateUtilities(testNegTrue,false);
-            testNegFalse = generateUtilities(testNegFalse,true);
+            generateUtilities(testPos,false);
+            generateUtilities(testNegTrue,false);
+            generateUtilities(testNegFalse,true);
 
             //assumption patient has to get the test done in the last year
             if (i != years)
             {
                 //no test node
                 Node differ1yr = new Node("differ1yr", 1,current);
-                Node die = new Node("die",probs.get("probDiein1yrUnknown"),differ1yr,0);
+                new Node("die",probs.get("probDiein1yrUnknown"),differ1yr,0);
             }
 
             //set up for next iteration
@@ -198,18 +165,17 @@ public class Main {
      */
     private static Node generateUtilities(Node genFor, boolean cancer)
     {
-        Node x = null;
         if (cancer)
         {
-            x = new Node("5cancer", live5yearwithCancer,genFor,50);
-            x = new Node("15cancer", live15yearwithCancer,genFor,80);
-            x = new Node("25cancer", live25yearwithCancer,genFor,100);
+            new Node("5cancer", live5yearwithCancer,genFor,50);
+            new Node("15cancer", live15yearwithCancer,genFor,80);
+            new Node("25cancer", live25yearwithCancer,genFor,100);
         }
         else
         {
-            x = new Node("5Nocancer", live5yearnoCancer,genFor,50);
-            x = new Node("15NoCancer", live15yearnoCancer,genFor,80);
-            x = new Node("25NoCancer", live25yearnoCancer,genFor,100);
+            new Node("5Nocancer", live5yearnoCancer,genFor,50);
+            new Node("15NoCancer", live15yearnoCancer,genFor,80);
+            new Node("25NoCancer", live25yearnoCancer,genFor,100);
         }
         return genFor;
     }
@@ -220,12 +186,19 @@ public class Main {
      * @param years the year the probabilities need to be generated for.
      * @return maps of probabilities
      */
-    private static HashMap<String,Double> getProbs (int years)
+    private static HashMap<String,Double> getProbs (int years, Boolean cancer, int lastTreatment)
     {
         HashMap<String,Double> probs = new HashMap<>();
 
-        //generates the probabilities -> turn into function
-        probs.put("probCancer",1 - Math.pow(1 - incidentRate, years));
+        //cancer rate probs
+        if (cancer)
+        {
+            probs.put("probCancer",1.0);
+        }
+        else
+        {
+            probs.put("probCancer",1 - Math.pow(1 - incidentRate, years - lastTreatment));
+        }
 
         //get test results
         probs.put("probTestPos",probs.get("probCancer") * findingCancerGivenCancer);
